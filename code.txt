@@ -1,3 +1,7 @@
-12 + 123.5 * hi + 34;
-hi;
-in;
+in a;
+in b;
+var c;
+out d;
+
+c = a + b;
+d = c*(a+3);
