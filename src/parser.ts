@@ -1,9 +1,12 @@
+// #region AST Types
 enum NodeType {
     Program,
     Assignment,
     Variable,
     Expression,
     Number,
+    Statement,
+    Decleration
 }
 
 interface ASTNode {
@@ -12,7 +15,30 @@ interface ASTNode {
 
 interface Program extends ASTNode {
     type: NodeType.Program
-    code: Assignment[]
+    code: Statement[]
+}
+
+enum StatementType {
+    Assignment,
+    Decleration
+}
+
+interface Statement extends ASTNode {
+    type: NodeType.Statement
+    statementType: StatementType
+    val: (Assignment | Decleration)
+}
+
+enum DeclerationType {
+    in,
+    out,
+    var
+}
+
+interface Decleration extends ASTNode {
+    type: NodeType.Decleration
+    varType: DeclerationType
+    name: string
 }
 
 interface Assignment extends ASTNode {
@@ -33,9 +59,26 @@ enum ExpressionOperator {
     minus
 }
 
+/**
+ * NN - LHS and RHS are both numbers
+ * 
+ * VN - LHS is a variable and RHS is a number
+ * 
+ * NV - LHS is a number and RHS is a variable
+ * 
+ * VV - LHS and RHS are both variables
+ */
+enum ExpressionType {
+    NN,
+    VN,
+    NV,
+    VV
+}
+
 interface Expression extends ASTNode {
     type: NodeType.Expression
     operator: ExpressionOperator
+    expressionType: ExpressionType
     lhs: (Variable | Number)
     rhs: (Variable | Number)
 }
@@ -51,12 +94,16 @@ interface Operator {
     type: ExpressionOperator
 }
 
+// #endregion
+
 const operators: Operator[] = [
     { symbol: "+", precedence: 10, type: ExpressionOperator.plus },
     { symbol: "-", precedence: 10, type: ExpressionOperator.minus },
     { symbol: "*", precedence: 20, type: ExpressionOperator.times },
     { symbol: "/", precedence: 20, type: ExpressionOperator.divide }
 ]
+
+
 
 export {
     Program,
@@ -65,5 +112,8 @@ export {
     Variable,
     Number,
     NodeType,
-    ExpressionOperator
+    ExpressionOperator,
+    Statement,
+    Decleration,
+    StatementType
 }

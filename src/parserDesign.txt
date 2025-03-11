@@ -1,0 +1,4 @@
+Remove the EOF
+split program into lines based off EOL
+
+parse line
