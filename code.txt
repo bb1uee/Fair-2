@@ -1,10 +1,1 @@
 in a;
-in b;
-var c;
-var e;
-out d;
-
-c = a + b;
-d = c*(a+3);
-e = 3+3;
-d = d + e;
