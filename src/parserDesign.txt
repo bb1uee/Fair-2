@@ -1,4 +1,28 @@
 Remove the EOF
 split program into lines based off EOL
 
-parse line
+Rules (This only parsers a statement and then these are all put into an array for a program)
+Statement -> Assignment | Decleration .
+Decleration -> declKey Id .
+declKey -> in | out | var .
+Assignment -> Id eq Expression .
+Value -> Id | Num .
+Expression -> SumExpr.
+SumExpr -> SumExpr sumOp MulExpr | MulExpr .
+MulExpr -> MulExpr mulOp Value | Value .
+
+Rewrite:
+Statement -> Assignment
+Statement -> Decleration
+Decleration -> declKey Id
+declKey -> in
+declKey -> out
+declKey -> var
+Assignment -> Id eq Expression
+Value -> Id
+Value -> Num
+Expression -> SumExpr
+SumExpr -> SumExpr sumOp MulExpr
+SumExpr -> MulExpr
+MulExpr -> MulExpr mulOp Value
+MulExpr -> Value

@@ -6,7 +6,8 @@ enum NodeType {
     Expression,
     Number,
     Statement,
-    Decleration
+    Decleration,
+    Value
 }
 
 interface ASTNode {
@@ -59,28 +60,22 @@ enum ExpressionOperator {
     minus
 }
 
-/**
- * NN - LHS and RHS are both numbers
- * 
- * VN - LHS is a variable and RHS is a number
- * 
- * NV - LHS is a number and RHS is a variable
- * 
- * VV - LHS and RHS are both variables
- */
-enum ExpressionType {
-    NN,
-    VN,
-    NV,
-    VV
+enum ValueType {
+    Variable,
+    Number
+}
+
+interface Value extends ASTNode {
+    type: NodeType.Value,
+    valueType: ValueType,
+    value: (Variable | Number)
 }
 
 interface Expression extends ASTNode {
     type: NodeType.Expression
     operator: ExpressionOperator
-    expressionType: ExpressionType
-    lhs: (Variable | Number)
-    rhs: (Variable | Number)
+    lhs: Value
+    rhs: Value
 }
 
 interface Number extends ASTNode {
@@ -115,5 +110,7 @@ export {
     ExpressionOperator,
     Statement,
     Decleration,
-    StatementType
+    StatementType,
+    Value,
+    ValueType
 }
