@@ -1,3 +1,5 @@
+import { Token, tokens } from "./lexer.js"
+
 // #region AST Types
 enum NodeType {
     Program,
@@ -98,7 +100,26 @@ const operators: Operator[] = [
     { symbol: "/", precedence: 20, type: ExpressionOperator.divide }
 ]
 
+var toParse = tokens.slice()
+var stack: Token[] = []
 
+function accept (token: Token) {
+    if (expect(token)) {
+        let top = toParse.shift()
+        
+        if (top === undefined) throw `Syntax Error: undefined`
+
+        stack.push(top)
+    }
+}
+
+function expect (token: Token): boolean {
+    if (toParse[0] === token) {
+        return true
+    }
+
+    throw `Invalid Syntax: Expected ${token} instead of ${toParse[0]}`
+}
 
 export {
     Program,
