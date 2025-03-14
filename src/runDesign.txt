@@ -4,3 +4,30 @@ Then the ast is executed
 later on make it so the ast can be saved and loaded to a file (should be easy)
 
 part 2 of parserDesign.txt was made at school during the havana solos lol
+
+execution.ts should have execute function that gets run
+
+keep track of variable list which contains all the variables, their names, and their type (in, out, var)
+variable type in is for input which is accepted from the user
+out is for output which is outputed to the user
+var is just for intermediate calculations
+
+table of execution values for each ast node:
+ast node to function to execute?
+
+function signature?:
+    - takes in:
+        - ast node
+        - variable list (really global state but just putting it here to make it look longer)
+    - returns:
+        - number (makes it easier to make the list without all the ifs and ?s)
+            - just return one even if not needed
+
+program -> run through every statement and execute
+statement -> check type and then either run assignment or decleration
+decleration -> declare variable and add it to variable list
+assignment -> runs expression and assigns that value returned to the variable
+expression -> does the operation in operator on the lhs and rhs
+number -> returns a number
+variable -> returns the value at that variable
+value -> returns the value of the child
