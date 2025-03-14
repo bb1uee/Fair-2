@@ -3,5 +3,5 @@ in b;
 var c;
 out d;
 
-c = a + b;
+c = 2a + b;
 d = c + a;

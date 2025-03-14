@@ -103,6 +103,10 @@ function lexer() {
                 continue
             }
 
+            if (tokens[tokens.length - 1].tokenType === TokenType.number) {
+                tokens.push({ tokenType: TokenType.operator, value: '*' })
+            }
+
             tokens.push({ tokenType: TokenType.variable, value: val })
             continue
         }

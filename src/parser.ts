@@ -106,7 +106,7 @@ var stack: Token[] = []
 
 // #region utils
 
-function accept (tokens: Token[], token: Token) {
+function accept (tokens: Token[], token: TokenType) {
     if (expect(token)) {
         let top = tokens.shift()
         
@@ -116,8 +116,8 @@ function accept (tokens: Token[], token: Token) {
     }
 }
 
-function expect (token: Token): boolean {
-    if (tokens[0] === token) {
+function expect (token: TokenType): boolean {
+    if (tokens[0].tokenType === token) {
         return true
     }
 
@@ -129,6 +129,7 @@ function expect (token: Token): boolean {
 let lines: Token[][] = []
 let ast: Program
 
+// accept and expect are only used for parsing assignments because declerations are simple enough to not need them 
 function parse() {
     // Removing the EOF
     tokens.pop()
@@ -165,16 +166,21 @@ function parseLine(line: Token[], lineIndex: number) {
 function parseAssignment(line: Token[], lineIndex: number): boolean {
     if (line[0].tokenType !== TokenType.variable) return false;
 
+    
+
     return true
 }
 
 function parseDecleration(line: Token[], lineIndex: number): boolean {
     if (line[0].tokenType !== TokenType.keyword) return false;
 
+    let declType = line[0].value === "in" ? DeclerationType.in : (line[0].value === "out" ? DeclerationType.out : DeclerationType.var)
+    let name = line[1].value
+
     let decleration: Decleration = {
         type: NodeType.Decleration,
-        varType: line[0].value === "in" ? DeclerationType.in : (line[0].value === "out" ? DeclerationType.out : DeclerationType.var),
-        name: line[1].value
+        varType: declType,
+        name: name
     }
 
     let statement: Statement = {
