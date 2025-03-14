@@ -104,6 +104,8 @@ const operators: Operator[] = [
 var toParse = tokens.slice()
 var stack: Token[] = []
 
+// #region utils
+
 function accept (token: Token) {
     if (expect(token)) {
         let top = toParse.shift()
@@ -120,6 +122,14 @@ function expect (token: Token): boolean {
     }
 
     throw `Invalid Syntax: Expected ${token} instead of ${toParse[0]}`
+}
+
+// #endregion
+
+function parse() {
+    toParse.pop()
+
+    
 }
 
 export {
