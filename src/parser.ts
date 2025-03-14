@@ -337,9 +337,11 @@ export {
     ExpressionOperator,
     Statement,
     Decleration,
+    DeclerationType,
     StatementType,
     Value,
     ValueType,
     parse,
-    ast
+    ast,
+    ASTNode
 }
