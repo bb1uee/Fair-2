@@ -26,3 +26,40 @@ SumExpr -> SumExpr sumOp MulExpr
 SumExpr -> MulExpr
 MulExpr -> MulExpr mulOp Value
 MulExpr -> Value
+
+---------------------------------------------------------------------------------------------------------
+
+Recursive Descent?
+
+a value is a variable, a number, or an expression
+
+parse:
+- Remove EOF
+- Split code into lines based on EOL
+- Loop through everyline:
+    - Attempt to parse assigment (parseAssignment) (This one should be more common so should go first)
+    - If not attempt to parse decleration (parseDecleration)
+    - If no throw error (make sure to keep track of the line to add to error message) (Error: line x is not a decleration or an assignment)
+
+parseDecleration:
+- look for decleration keyword
+    - if there is continue
+    - if not return
+- look for identifier (if none throw error) (Error: expected identifier after decleration keyword on line x)
+- return
+
+parseAssignment:
+- look for identifier
+    - if there is continue
+    - if not return
+- expect =
+- parseExpression
+
+parseExpression:
+- return if there are no more tokens to parse
+- use stack method
+    - push members on to a stack until u have a binary expression (x * y or x + x)
+    - check if the next member is a higher precedent
+        - if so continue
+        - if not compress
+    - call parseExpression on the same set

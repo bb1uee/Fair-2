@@ -64,13 +64,14 @@ enum ExpressionOperator {
 
 enum ValueType {
     Variable,
-    Number
+    Number,
+    Expression
 }
 
 interface Value extends ASTNode {
     type: NodeType.Value,
     valueType: ValueType,
-    value: (Variable | Number)
+    value: (Variable | Number | Expression)
 }
 
 interface Expression extends ASTNode {
