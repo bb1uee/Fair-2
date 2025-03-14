@@ -1,0 +1,6 @@
+Each time the program is run the lexer and parser are run to form the ast
+
+Then the ast is executed
+later on make it so the ast can be saved and loaded to a file (should be easy)
+
+part 2 of parserDesign.txt was made at school during the havana solos lol
