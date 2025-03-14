@@ -62,13 +62,14 @@ enum ExpressionOperator {
 
 enum ValueType {
     Variable,
-    Number
+    Number,
+    Expression
 }
 
 interface Value extends ASTNode {
     type: NodeType.Value,
     valueType: ValueType,
-    value: (Variable | Number)
+    value: (Variable | Number | Expression)
 }
 
 interface Expression extends ASTNode {
@@ -97,8 +98,6 @@ const operators: Operator[] = [
     { symbol: "*", precedence: 20, type: ExpressionOperator.times },
     { symbol: "/", precedence: 20, type: ExpressionOperator.divide }
 ]
-
-
 
 export {
     Program,
