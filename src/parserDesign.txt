@@ -36,7 +36,7 @@ a value is a variable, a number, or an expression
 parse:
 - Remove EOF
 - Split code into lines based on EOL
-- Loop through everyline:
+- Loop through every line:
     - Attempt to parse assigment (parseAssignment) (This one should be more common so should go first)
     - If not attempt to parse decleration (parseDecleration)
     - If no throw error (make sure to keep track of the line to add to error message) (Error: line x is not a decleration or an assignment)

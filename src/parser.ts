@@ -1,4 +1,5 @@
-import { Token, tokens } from "./lexer.js"
+import { Token, tokens, TokenType } from "./lexer.js"
+import { splitArray } from "./utils.js"
 
 // #region AST Types
 enum NodeType {
@@ -29,13 +30,13 @@ enum StatementType {
 interface Statement extends ASTNode {
     type: NodeType.Statement
     statementType: StatementType
-    val: (Assignment | Decleration)
+    statement: (Assignment | Decleration)
 }
 
 enum DeclerationType {
     in,
-    out,
-    var
+    var,
+    out
 }
 
 interface Decleration extends ASTNode {
@@ -47,7 +48,7 @@ interface Decleration extends ASTNode {
 interface Assignment extends ASTNode {
     type: NodeType.Assignment
     rhs: Variable
-    lhs: Expression
+    lhs: Value
 }
 
 interface Variable extends ASTNode {
@@ -101,14 +102,13 @@ const operators: Operator[] = [
     { symbol: "/", precedence: 20, type: ExpressionOperator.divide }
 ]
 
-var toParse = tokens.slice()
 var stack: Token[] = []
 
 // #region utils
 
-function accept (token: Token) {
+function accept (tokens: Token[], token: Token) {
     if (expect(token)) {
-        let top = toParse.shift()
+        let top = tokens.shift()
         
         if (top === undefined) throw `Syntax Error: undefined`
 
@@ -117,19 +117,75 @@ function accept (token: Token) {
 }
 
 function expect (token: Token): boolean {
-    if (toParse[0] === token) {
+    if (tokens[0] === token) {
         return true
     }
 
-    throw `Invalid Syntax: Expected ${token} instead of ${toParse[0]}`
+    throw `Invalid Syntax: Expected ${token} instead of ${tokens[0]}`
 }
 
 // #endregion
 
-function parse() {
-    toParse.pop()
+let lines: Token[][] = []
+let ast: Program
 
-    
+function parse() {
+    // Removing the EOF
+    tokens.pop()
+
+    ast = {
+        type: NodeType.Program,
+        code: []
+    }
+
+    lines = splitArray(tokens, (_) => {
+        if (_.tokenType === TokenType.EOL) {
+            return true
+        }
+
+        return false
+    })
+
+    let lineIndex = 0
+
+    lines.forEach(line => {
+        // new function for cleanliness
+        parseLine(lines[lineIndex], lineIndex)
+        lineIndex++
+    });
+}
+
+function parseLine(line: Token[], lineIndex: number) {
+    if (parseAssignment(line, lineIndex)) return;
+    else if (parseDecleration(line, lineIndex)) return;
+
+    throw `Error: line ${lineIndex + 1} is not a decleration or an assignment`
+}
+
+function parseAssignment(line: Token[], lineIndex: number): boolean {
+    if (line[0].tokenType !== TokenType.variable) return false;
+
+    return true
+}
+
+function parseDecleration(line: Token[], lineIndex: number): boolean {
+    if (line[0].tokenType !== TokenType.keyword) return false;
+
+    let decleration: Decleration = {
+        type: NodeType.Decleration,
+        varType: line[0].value === "in" ? DeclerationType.in : (line[0].value === "out" ? DeclerationType.out : DeclerationType.var),
+        name: line[1].value
+    }
+
+    let statement: Statement = {
+        type: NodeType.Statement,
+        statementType: StatementType.Decleration,
+        statement: decleration
+    }
+
+    ast.code.push(statement)
+
+    return true;
 }
 
 export {
@@ -144,5 +200,7 @@ export {
     Decleration,
     StatementType,
     Value,
-    ValueType
+    ValueType,
+    parse,
+    ast
 }

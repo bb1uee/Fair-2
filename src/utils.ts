@@ -16,8 +16,8 @@ function isKeyword(target: string) {
     return keywords.includes(target)
 }
 
-function splitArray<T>(data:T[], shouldSplit: (element: T) => boolean): T[][] {
-    let ret: T[][] = [[]]
+function splitArray<T>(data: T[], shouldSplit: (element: T) => boolean): T[][] {
+    let ret: T[][] = []
 
     let start = 0;
     for (let i = 0; i < data.length; i++) {
@@ -27,8 +27,9 @@ function splitArray<T>(data:T[], shouldSplit: (element: T) => boolean): T[][] {
         }
     }
 
-    ret.push(data.slice(start, data.length))
-    ret.shift()
+    // Adding the last segment
+    if (start !== data.length)
+        ret.push(data.slice(start))
 
     return ret
 }

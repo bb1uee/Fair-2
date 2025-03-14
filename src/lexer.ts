@@ -114,10 +114,7 @@ export {
     lexer,
     readNumber,
     readWord,
-    tokens
-}
-
-export type {
+    tokens,
     TokenType,
     Token
 }
