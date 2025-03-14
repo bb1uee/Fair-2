@@ -228,6 +228,9 @@ function parseAssignment(line: Token[], lineIndex: number): boolean {
 function parseExpression(line: Token[], lineIndex: number, newExpr: boolean) {
     // Creating a binary expression
     if (newExpr) acceptValue(line)
+    if (!line[0]) {
+        return
+    }
     accept(line, TokenType.operator)
     acceptValue(line)
 
