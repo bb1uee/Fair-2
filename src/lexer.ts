@@ -4,7 +4,7 @@ import { isAlpha, isKeyword, isNum } from "./utils.js"
 enum TokenType {
     operator,
     number,
-    variable,
+    identifier,
     keyword,
     seperator,
     EOL,
@@ -73,6 +73,10 @@ function lexer() {
                 tokens.push({ tokenType: TokenType.operator, value: '/' })
                 consumeCharacter()
                 continue
+            case '/':
+                tokens.push({ tokenType: TokenType.operator, value: '^' })
+                consumeCharacter()
+                continue
             case ";":
                 tokens.push({ tokenType: TokenType.EOL, value: "EOL" })
                 consumeCharacter()
@@ -107,7 +111,7 @@ function lexer() {
                 tokens.push({ tokenType: TokenType.operator, value: '*' })
             }
 
-            tokens.push({ tokenType: TokenType.variable, value: val })
+            tokens.push({ tokenType: TokenType.identifier, value: val })
             continue
         }
     }

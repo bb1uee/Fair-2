@@ -63,3 +63,8 @@ parseExpression:
         - if so continue
         - if not compress
     - call parseExpression on the same set
+
+For stack method, compress from the rightmost token first
+
+[a + b * c + d]
+[a + b * c]
