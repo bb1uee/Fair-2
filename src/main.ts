@@ -4,11 +4,15 @@ import { execute } from "./execution.js"
 import { lexer, tokens } from "./lexer.js"
 import { ast, parse } from "./parser.js"
 
-readCode("./code.txt")
-lexer()
-parse()
+try {
+    readCode("./code.txt")
+    lexer()
+    parse()
 
-execute(ast, new Map<string, number>([
-    ["a", 2],
-    ["b", 3]
-]))
+    execute(ast, new Map<string, number>([
+        ["a", 2],
+        ["b", 3]
+    ]))
+} catch (e) {
+    console.log(e)
+}

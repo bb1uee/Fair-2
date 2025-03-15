@@ -3,4 +3,7 @@ in b;
 var c;
 out d;
 
-d = a ^ b
+c = a * b;
+d = c ^ 2;
+c = d / 2;
+d = c + 4;
