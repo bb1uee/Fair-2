@@ -1,9 +1,14 @@
+import { readFile, readFileSync } from "fs"
 import { readCode } from "./code.js"
-import { lexer } from "./lexer.js"
+import { execute } from "./execution.js"
+import { lexer, tokens } from "./lexer.js"
 import { ast, parse } from "./parser.js"
 
 readCode("./code.txt")
 lexer()
 parse()
 
-console.log(JSON.stringify(ast, undefined, 4))
+execute(ast, new Map<string, number>([
+    ["a", 2],
+    ["b", 3]
+]))

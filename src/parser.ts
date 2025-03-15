@@ -251,10 +251,12 @@ function parseExpression(line: Token[], lineIndex: number, newExpr: boolean) {
     if (precedence > stackPrecedence) parseExpression(line, lineIndex, false)
 
     let rhs: Value
+    //console.log(stack[stack.length - 1])
 
-    if ("lhs" in stack[stack.length - 1]) {
+    if ("valueType" in stack[stack.length - 1]) {
         rhs = stack[stack.length - 1] as Value
     } else {
+        //console.log(stack[stack.length - 1])
         rhs = tokenToValue(stack[stack.length - 1] as Token)
     }
 
@@ -273,16 +275,15 @@ function parseExpression(line: Token[], lineIndex: number, newExpr: boolean) {
         case '/':
             operator = ExpressionOperator.divide
             break
+        case '^':
+            operator = ExpressionOperator.power
+            break
     }
 
     let lhs: Value
 
-    if ("lhs" in stack[stack.length - 3]) {
-        lhs = {
-            type: NodeType.Value,
-            valueType: ValueType.Expression,
-            value: stack[stack.length - 3] as Expression
-        }
+    if ("valueType" in stack[stack.length - 3]) {
+        lhs = stack[stack.length - 3] as Value
     } else {
         lhs = tokenToValue(stack[stack.length - 3] as Token)
     }
@@ -301,6 +302,8 @@ function parseExpression(line: Token[], lineIndex: number, newExpr: boolean) {
             rhs: rhs
         }
     } as Value)
+
+    // console.log(lhs)
 
     if (line[0]) parseExpression(line, lineIndex, false)
 

@@ -73,7 +73,7 @@ function lexer() {
                 tokens.push({ tokenType: TokenType.operator, value: '/' })
                 consumeCharacter()
                 continue
-            case '/':
+            case '^':
                 tokens.push({ tokenType: TokenType.operator, value: '^' })
                 consumeCharacter()
                 continue
