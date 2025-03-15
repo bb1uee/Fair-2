@@ -1,4 +1,3 @@
-import { NODATA } from "dns"
 import { Token, tokens, TokenType } from "./lexer.js"
 import { splitArray } from "./utils.js"
 
@@ -11,7 +10,9 @@ enum NodeType {
     Number,
     Statement,
     Decleration,
-    Value
+    Value,
+    ParameterList,
+    FunctionCall
 }
 
 interface ASTNode {
@@ -68,13 +69,14 @@ enum ExpressionOperator {
 enum ValueType {
     Variable,
     Number,
-    Expression
+    Expression,
+    FunctionCall
 }
 
 interface Value extends ASTNode {
     type: NodeType.Value,
     valueType: ValueType,
-    value: (Variable | Number | Expression)
+    value: (Variable | Number | Expression | FunctionCall)
 }
 
 interface Expression extends ASTNode {
@@ -93,6 +95,17 @@ interface Operator {
     symbol: string
     precedence: number
     type: ExpressionOperator
+}
+
+interface ParameterList extends ASTNode {
+    type: NodeType.ParameterList
+    parameters: Value[]
+}
+
+interface FunctionCall extends ASTNode {
+    type: NodeType.FunctionCall
+    name: string
+    parameters: ParameterList
 }
 
 // #endregion
@@ -121,8 +134,26 @@ function expect (tokens: Token[], token: TokenType): boolean {
     if (tokens[0].tokenType === token) {
         return true
     }
-    
-    throw `Invalid Syntax: Expected ${token} instead of ${tokens[0]}`
+
+    throw `Invalid Syntax: Expected ${token} instead of ${tokens[0].tokenType} (expect call)`
+}
+
+function acceptToken (tokens: Token[], token: Token) {
+    if (expectToken(tokens, token)) {
+        let top = tokens.shift()
+        
+        if (top === undefined) throw `Syntax Error: undefined`
+
+        stack.push(top)
+    }
+}
+
+function expectToken (tokens: Token[], token: Token): boolean {
+    if (tokens[0] === token) {
+        return true
+    }
+
+    throw `Invalid Syntax: Expected ${token} instead of ${tokens[0].tokenType} (expect call)`
 }
 
 function tokenToValue (token: Token): Value {
@@ -155,65 +186,47 @@ function acceptValue(tokens: Token[]) {
 // #endregion
 
 let lines: Token[][] = []
-let ast: Program
+let ast: Program = {
+    type: NodeType.Program,
+    code: []
+}
 
 let stack: (Token | ASTNode)[] = []
 
-// accept and expect are only used for parsing assignments because declerations are simple enough to not need them 
+// #region main parser
+
 function parse() {
-    // Removing the EOF
-    tokens.pop()
-
-    ast = {
-        type: NodeType.Program,
-        code: []
-    }
-
     lines = splitArray(tokens, (_) => {
-        if (_.tokenType === TokenType.EOL) {
-            return true
-        }
-
-        return false
+        return _.tokenType === TokenType.EOL
     })
 
-    let lineIndex = 0
-
-    lines.forEach(line => {
-        // new function for cleanliness
-        parseLine(lines[lineIndex], lineIndex)
-        lineIndex++
-    });
+    lines.forEach((_, index) => {
+        if (parseAssignment(lines[index], index + 1)) return
+        else if (parseDecleration(lines[index], index + 1)) return
+        throw `Invalid Syntax: line ${index + 1} does not contain a decleration or an assignment`
+    })
 }
 
-function parseLine(line: Token[], lineIndex: number) {
-    if (parseAssignment(line, lineIndex)) return;
-    else if (parseDecleration(line, lineIndex)) return;
-
-    throw `Error: line ${lineIndex + 1} is not a decleration or an assignment`
-}
-
-function parseAssignment(line: Token[], lineIndex: number): boolean {
-    if (line[0].tokenType !== TokenType.identifier) return false;
+function parseAssignment(line: Token[], lineNumber: number): boolean {
     stack = []
+    if (line[0].tokenType !== TokenType.identifier) return false
 
     let name = line[0].value
 
-    // Parse the start of the assignment and popping those out so that they aren't uselessly in there
     accept(line, TokenType.identifier)
-    stack.pop()
-    accept(line, TokenType.operator)
-    stack.pop()
-    
-    parseExpression(line, lineIndex, true)
-    
+    acceptToken(line, {
+        tokenType: TokenType.operator,
+        value: "="
+    })
+
+    let value = parseExpression(line, lineNumber)
     let assignment: Assignment = {
         type: NodeType.Assignment,
         lhs: {
             type: NodeType.Variable,
             name: name
         },
-        rhs: stack[0] as Value
+        rhs: value
     }
 
     ast.code.push({
@@ -225,113 +238,37 @@ function parseAssignment(line: Token[], lineIndex: number): boolean {
     return true
 }
 
-function parseExpression(line: Token[], lineIndex: number, newExpr: boolean) {
-    // Creating a binary expression
-    if (newExpr) acceptValue(line)
-    if (!line[0]) {
-        return
-    }
-    accept(line, TokenType.operator)
-    acceptValue(line)
+function parseDecleration(line: Token[], lineNumber: number): boolean {
+    stack = []
+    if (line[0].tokenType !== TokenType.keyword) return false
+    if (line[0].value !== "in" && line[0].value !== "out" && line[0].value !== "var") return false
 
-    let precedence = 0
-    let stackPrecedence = 0
+    let type: DeclerationType = line[0].value === "in" ? DeclerationType.in : (line[0].value === "out" ? DeclerationType.out : DeclerationType.var)
 
-    // find operator precedence
-    if (line[0]) {
-        operators.forEach(_ => {
-            if (_.symbol === line[0].value) precedence = _.precedence
-        })
-
-        operators.forEach(_ => {
-            if (_.symbol === (stack[stack.length - 2] as Token).value) stackPrecedence = _.precedence
-        })
-    }
-
-    if (precedence > stackPrecedence) parseExpression(line, lineIndex, false)
-
-    let rhs: Value
-    //console.log(stack[stack.length - 1])
-
-    if ("valueType" in stack[stack.length - 1]) {
-        rhs = stack[stack.length - 1] as Value
-    } else {
-        //console.log(stack[stack.length - 1])
-        rhs = tokenToValue(stack[stack.length - 1] as Token)
-    }
-
-    let operator: ExpressionOperator = ExpressionOperator.plus
-
-    switch((stack[stack.length - 2] as Token).value) {
-        case '+':
-            operator = ExpressionOperator.plus
-            break
-        case '-':
-            operator = ExpressionOperator.minus
-            break
-        case '*':
-            operator = ExpressionOperator.times
-            break
-        case '/':
-            operator = ExpressionOperator.divide
-            break
-        case '^':
-            operator = ExpressionOperator.power
-            break
-    }
-
-    let lhs: Value
-
-    if ("valueType" in stack[stack.length - 3]) {
-        lhs = stack[stack.length - 3] as Value
-    } else {
-        lhs = tokenToValue(stack[stack.length - 3] as Token)
-    }
-
-    // replace the binary expression with a value
-    stack.pop()
-    stack.pop()
-    stack.pop()
-    stack.push({
-        type: NodeType.Value,
-        valueType: ValueType.Expression,
-        value: {
-            type: NodeType.Expression,
-            operator: operator,
-            lhs: lhs,
-            rhs: rhs
-        }
-    } as Value)
-
-    // console.log(lhs)
-
-    if (line[0]) parseExpression(line, lineIndex, false)
-
-}
-
-
-function parseDecleration(line: Token[], lineIndex: number): boolean {
-    if (line[0].tokenType !== TokenType.keyword) return false;
-
-    let declType = line[0].value === "in" ? DeclerationType.in : (line[0].value === "out" ? DeclerationType.out : DeclerationType.var)
-    let name = line[1].value
+    accept(line, TokenType.keyword)
 
     let decleration: Decleration = {
         type: NodeType.Decleration,
-        varType: declType,
-        name: name
+        varType: type,
+        name: line[0].value
     }
 
-    let statement: Statement = {
+    ast.code.push({
         type: NodeType.Statement,
         statementType: StatementType.Decleration,
         statement: decleration
-    }
+    })
 
-    ast.code.push(statement)
-
-    return true;
+    return true
 }
+
+// #endregion
+
+// #region expression parsing
+function parseExpression(line: Token[], lineNumber: number, newExpr: boolean = true): Value {
+
+}
+// #endregion
 
 export {
     Program,
@@ -347,7 +284,9 @@ export {
     StatementType,
     Value,
     ValueType,
-    parse,
     ast,
-    ASTNode
+    ASTNode,
+    ParameterList,
+    FunctionCall,
+    parse
 }

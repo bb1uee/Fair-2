@@ -1,0 +1,79 @@
+prolly gonna try bottom up
+
+[b * (c + sin(d))]
+
+push b to the stack:
+[* (c + sin(d))]
+[b]
+
+push * to the stack:
+[(c + sin(d))]
+[b *]
+
+parseExpression:
+    - while there are more tokens
+        - push next one onto the stack
+        - attemptReductions
+    - return the top of the stack
+
+attemptReductions:
+    - go through each reduction
+        - if none work return
+        - if one of them works do the reduction and then call attemptReductions
+
+reduction:
+    - contains checker that checks if reduction applies
+    - contains action to run reduction
+
+reduction list:
+- reduce binary expression
+    - top of the stack is [value operator value]
+    - lookahead is either an operator with lower precedence or the end of the string or a seperator
+    - replace those with a value that contains an expression
+- reduce number
+    - top of the stack is a number
+    - replace it with a value that contains a number
+- reduce variable
+    - top of the stack is an identifier
+    - lookahead is either an operator or the end of the string
+    - replace it with a value that contains a variable
+- reduce parameter list
+    - top of the stack is [parameterlist , value]
+    - replace it with that same parameterlist with the value added to the parameter list
+- reduce parameter list (single value)
+    - top of the stack is [identifier ( value]
+    - reduce the value with a parameter list with the value in it
+- reduce parenthesis
+    - top of the stack is [( value )]
+    - reduce the entire thing to that same expression
+- reduce function call
+    - top of the stack is [identifier ( parameterlist )]
+    - reduce the thing to a value with an expression inside of it
+
+[b * (c + sin(d))]
+[b]
+reduce variable
+[value]
+[value *]
+[value * (]
+[value * (c]
+reduce variable
+[value * (value]
+[value * (value +]
+[value * (value + sin]
+[value * (value + sin(]
+[value * (value + sin(d]
+reduce variable
+[value * (value + sin(value]
+reduce parameterlist
+[value * (value + sin(parameterlist]
+[value * (value + sin(parameterlist)]
+reduce function call
+[value * (value + value]
+reduce binary expression
+[value * (value]
+[value * (value)]
+reduce parenthesis
+[value * value]
+reduce binary expression
+[value]
