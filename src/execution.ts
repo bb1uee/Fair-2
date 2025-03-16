@@ -3,6 +3,7 @@ import { ASTNode, Decleration, DeclerationType, NodeType, Program, Statement, St
 import { createInterface } from 'readline'
 import { readFileSync } from "fs"
 import { NOTIMP } from "dns"
+import { parseArgs } from "util"
 
 // #region data
 
@@ -172,6 +173,41 @@ let variables: Map<string, RuntimeVariable> = new Map()
 let functions: Map<string, (params: number[]) => number> = new Map([
     ["sin", (params: number[]) => {
         return Math.sin(params[0])
+    }],
+    ["sqrt", (params: number[]) => {
+        return Math.sqrt(params[0])
+    }],
+    ["root", (params: number[]) => {
+        // Take the second number to the root specified by the first one
+        return Math.pow(params[1], 1 / params[0])
+    }],
+    ["log", (params: number[]) => {
+        // The base 10 logarthim
+        return Math.log10(params[0])
+    }],
+    ["cos", (params: number[]) => {
+        return Math.cos(params[0])
+    }],
+    ["tan", (params: number[]) => {
+        return Math.tan(params[0])
+    }],
+    ["arcsin", (params: number[]) => {
+        return Math.asin(params[0])
+    }],
+    ["arccos", (params: number[]) => {
+        return Math.acos(params[0])
+    }],
+    ["arctan", (params: number[]) => {
+        return Math.atan(params[0])
+    }],
+    ["csc", (params: number[]) => {
+        return 1 / Math.sin(params[0])
+    }],
+    ["sec", (params: number[]) => {
+        return 1 / Math.cos(params[0])
+    }],
+    ["cot", (params: number[]) => {
+        return 1 / Math.tan(params[0])
     }]
 ])
 let nodeExecutions: Map<NodeType, (node: ASTNode) => number> = new Map([
