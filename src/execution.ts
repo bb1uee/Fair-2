@@ -208,6 +208,14 @@ let functions: Map<string, (params: number[]) => number> = new Map([
     }],
     ["cot", (params: number[]) => {
         return 1 / Math.tan(params[0])
+    }],
+    ["rd", (params: number[]) => {
+        // radians to degrees
+        return params[0] * 360 / (2*Math.PI)
+    }],
+    ["dr", (params: number[]) => {
+        // degrees to radians
+        return params[0] * 2 * Math.PI / 360
     }]
 ])
 let nodeExecutions: Map<NodeType, (node: ASTNode) => number> = new Map([

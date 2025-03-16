@@ -4,8 +4,8 @@ in C;
 var c;
 out D;
 
-C = C / 360 * 3.14159265 * 2;
+C = dr(C);
 c = a^2 + b^2 - 2a * b * cos(C);
 c = sqrt(c);
 D = arccos((a^2+c^2-b^2)/(2a*c));
-D = D / (3.14159265 * 2) * 360;
+D = rd(D);

@@ -11,9 +11,9 @@ try {
     parse()
 
     execute(ast, new Map<string, number>([
-        ["a", 660],
-        ["b", 460],
-        ["C", 99]
+        ["a", 3.1],
+        ["b", 4.9],
+        ["C", 123]
     ]))
 
     // console.log(JSON.stringify(ast, null, 4))
