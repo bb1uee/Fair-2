@@ -148,13 +148,28 @@ function assignment(node: ASTNode): number {
 
 function functioncall(node: ASTNode): number {
     let functioncall = node as FunctionCall
+
+    let run = nodeExecutions.get(NodeType.Value) as (node: ASTNode) => number
+    let params: number[] = []
+
+    functioncall.parameters.parameters.forEach(_ => {
+        params.push(run (_))
+    })
+
+    let func = functions.get(functioncall.name)
+
+    if (!func) throw `Syntax Error: function ${functioncall.name} does not exist`
+
+    return func(params)
 }
 
 //#endregion
 
 let variables: Map<string, RuntimeVariable> = new Map()
 let functions: Map<string, (params: number[]) => number> = new Map([
-    
+    ["sin", (params: number[]) => {
+        return Math.sin(params[0])
+    }]
 ])
 let nodeExecutions: Map<NodeType, (node: ASTNode) => number> = new Map([
     [NodeType.Program, program],
