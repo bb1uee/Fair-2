@@ -472,6 +472,43 @@ let reduceFunctionCall: Reduction = {
     name: "Reduce Function Call"
 }
 
+let reduceParameterLessFunctionCall: Reduction = {
+    checker: (line) => {
+        if (stack.length < 3) return false
+
+        let close = stack[stack.length - 1]
+        let open = stack[stack.length - 2]
+        let identifier = stack[stack.length - 3]
+
+        let goodClose = "tokenType" in close && close.value === ")"
+        let goodOpen = "tokenType" in open && open.value === '('
+        let goodIdentifier = "tokenType" in identifier && identifier.tokenType === TokenType.identifier
+
+        return goodClose && goodOpen && goodIdentifier
+    },
+    reducer: (line) => {
+        stack.pop()
+        stack.pop()
+        let identifier = stack.pop() as Token
+
+        let call = {
+            type: NodeType.FunctionCall,
+            name: identifier.value,
+            parameters: {
+                type: NodeType.ParameterList,
+                parameters: []
+            }
+        } as FunctionCall
+
+        stack.push({
+            type: NodeType.Value,
+            valueType: ValueType.FunctionCall,
+            value: call
+        } as Value)
+    },
+    name: "Reduce Parameterless Function Call"
+}
+
 let reduceParameterList: Reduction = {
     checker: (line) => {
         if (stack.length < 3) return false
@@ -506,7 +543,8 @@ let reductions: Reduction[] = [
     reduceParenthesis,
     reduceSingleParameter,
     reduceFunctionCall,
-    reduceParameterList
+    reduceParameterList,
+    reduceParameterLessFunctionCall
 ]
 
 function parseExpression(line: Token[], lineNumber: number): Value {

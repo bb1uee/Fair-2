@@ -216,6 +216,15 @@ let functions: Map<string, (params: number[]) => number> = new Map([
     ["dr", (params: number[]) => {
         // degrees to radians
         return params[0] * 2 * Math.PI / 360
+    }],
+    ["pi", (params: number[]) => {
+        return Math.PI
+    }],
+    ["e", (params: number[]) => {
+        return Math.E
+    }],
+    ["ln", (params: number[]) => {
+        return Math.log(params[0]) / Math.log(Math.E)
     }]
 ])
 let nodeExecutions: Map<NodeType, (node: ASTNode) => number> = new Map([
