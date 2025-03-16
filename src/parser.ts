@@ -357,7 +357,7 @@ let reduceBinaryExpr: Reduction = {
         let goodOperator = false
 
         if (line[0].tokenType === TokenType.operator) {
-            goodOperator = getOperatorPrecedence(line[0].value) < getOperatorPrecedence(stack2.value)
+            goodOperator = getOperatorPrecedence(line[0].value) <= getOperatorPrecedence(stack2.value)
         }
 
         return lookEnd || goodOperator
