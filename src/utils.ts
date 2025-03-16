@@ -9,7 +9,7 @@ function isAlpha(char: string) {
 }
 
 function isNum(char: string) {
-    return /[1-9]/.test(char)
+    return /[0-9]/.test(char)
 }
 
 function isKeyword(target: string) {

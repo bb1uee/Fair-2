@@ -7,12 +7,13 @@ import { ast, parse } from "./parser.js"
 try {
     readCode("./code.txt")
     lexer()
+    console.log("throw")
     parse()
 
     execute(ast, new Map<string, number>([
-        ["b", 2],
-        ["c", 3],
-        ["d", 3.14]
+        ["a", 660],
+        ["b", 460],
+        ["C", 99]
     ]))
 
     // console.log(JSON.stringify(ast, null, 4))

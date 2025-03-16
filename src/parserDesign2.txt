@@ -41,11 +41,11 @@ reduction list:
     - top of the stack is [parameterlist , value]
     - replace it with that same parameterlist with the value added to the parameter list
 - reduce parameter list (single value)
-    - top of the stack is [identifier ( value]
+    - top of the stack is [identifier ( value , or )]
     - reduce the value with a parameter list with the value in it
 - reduce parenthesis
-    - top of the stack is [( value )]
-    - reduce the entire thing to that same expression
+    - top of the stack is [not identifier ( value )]
+    - reduce the entire thing but the operator to that same expression
 - reduce function call
     - top of the stack is [identifier ( parameterlist )]
     - reduce the entire thing to a value with an FunctionCall inside of it

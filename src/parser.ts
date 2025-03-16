@@ -384,18 +384,19 @@ let reduceBinaryExpr: Reduction = {
 
 let reduceParenthesis: Reduction = {
     checker: (line) => {
-        if (stack.length < 3) return false
+        if (stack.length < 4) return false
 
         let right = stack[stack.length - 1]
         let value = stack[stack.length - 2]
         let left = stack[stack.length - 3]
+        let operator = stack[stack.length - 4]
 
-        if (!right || !value || !left) return false
-        if (!("tokenType" in right) || right.value !== ")") return false
-        if (!("tokenType" in left) || left.value !== "(") return false
-        if (!("valueType" in value)) return false
+        let goodRight = "tokenType" in right && right.value === ")"
+        let goodValue = "valueType" in value
+        let goodLeft = "tokenType" in left && left.value === "("
+        let goodOperator = "tokenType" in operator && operator.tokenType !== TokenType.identifier
 
-        return true
+        return goodRight && goodValue && goodLeft && goodOperator
     },
     reducer: (line) => {
         stack.pop()
@@ -411,15 +412,17 @@ let reduceSingleParameter: Reduction = {
     checker: (line) => {
         if (stack.length < 3) return false
 
+        let seperator = line[0]
         let value = stack[stack.length - 1]
         let paren = stack[stack.length - 2]
         let identifier = stack[stack.length - 3]
 
+        let goodSeperator = "tokenType" in seperator && (seperator.value === ")" || seperator.value === ",")
         let goodValue = "valueType" in value
         let goodParen = "tokenType" in paren && paren.value === "("
         let goodIdentifier = "tokenType" in identifier && identifier.tokenType === TokenType.identifier
 
-        return goodValue && goodParen && goodIdentifier
+        return goodValue && goodParen && goodIdentifier && goodSeperator
     },
     reducer: (line) => {
         let value = stack.pop() as Value
@@ -519,6 +522,7 @@ function parseExpression(line: Token[], lineNumber: number): Value {
         attemptReductions(line)
     }
 
+    console.log(stack)
     if (!("valueType" in stack[0])) throw `Parsing Error: value is not at the top of the stack on line ${lineNumber}`
 
     return stack[0] as Value
