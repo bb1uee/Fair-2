@@ -190,6 +190,30 @@ function acceptValue(tokens: Token[]) {
         else accept(tokens, TokenType.identifier)
 }
 
+function getOperatorPrecedence(type: string): number {
+    let ret: number | undefined = undefined
+    operators.forEach(_ => {
+        if (_.symbol === type) {
+            ret = _.precedence
+        }
+    })
+
+    if (ret === undefined) throw `Syntax Error: operator ${type} does not exist (precedence)`
+    return ret
+}
+
+function getOperator(type: string): ExpressionOperator {
+    let ret: ExpressionOperator | undefined = undefined
+    operators.forEach(_ => {
+        if (_.symbol === type) {
+            ret = _.type
+        }
+    })
+
+    if (ret === undefined) throw `Syntax Error: operator ${type} does not exist`
+    return ret
+}
+
 // #endregion
 
 let lines: Token[][] = []
@@ -278,7 +302,9 @@ function parseDecleration(line: Token[], lineNumber: number): boolean {
 
 let reduceNumber: Reduction = {
     checker: (line) => {
-        return "tokenType" in stack[0] && stack[0].tokenType === TokenType.number
+        let stack1 = stack[stack.length - 1]
+        if (!("tokenType" in stack1)) return false
+        return stack1.tokenType === TokenType.number
     },
     reducer: (line) => {
         let token = stack.pop() as Token
@@ -298,7 +324,9 @@ let reduceNumber: Reduction = {
 
 let reduceVariable: Reduction = {
     checker: (line) => {
-        return "tokenType" in stack[0] && stack[0].tokenType === TokenType.identifier && (line[0].tokenType === TokenType.operator || line[0].tokenType === TokenType.EOL)
+        let stack1 = stack[stack.length - 1]
+        if (!("tokenType" in stack1)) return false
+        return stack1.tokenType === TokenType.identifier && line[0].value !== "("
     },
     reducer: (line) => {
         let token = stack.pop() as Token
@@ -316,11 +344,76 @@ let reduceVariable: Reduction = {
     name: "Reduce Variable"
 }
 
+let reduceBinaryExpr: Reduction = {
+    checker: (line) => {
+        let goodStack = false
+        let stack2 = stack[stack.length - 2]
+        if (stack.length < 3) return false
+        if (!("tokenType" in stack2)) return false
+        goodStack = "valueType" in stack[stack.length - 3] && "valueType" in stack[stack.length - 1] && stack2.tokenType === TokenType.operator
+        if (!goodStack) return false
+
+        let lookEnd = line[0].tokenType === TokenType.EOL || line[0].tokenType === TokenType.seperator
+        let goodOperator = false
+
+        if (line[0].tokenType === TokenType.operator) {
+            goodOperator = getOperatorPrecedence(line[0].value) < getOperatorPrecedence(stack2.value)
+        }
+
+        return lookEnd || goodOperator
+    },
+    reducer: (line) => {
+        let rhs = stack.pop() as Value
+        let operator = stack.pop() as Token
+        let lhs = stack.pop() as Value
+        let expression: Expression = {
+            type: NodeType.Expression,
+            operator: getOperator(operator.value),
+            lhs: lhs,
+            rhs: rhs
+        }
+
+        stack.push({
+            type: NodeType.Value,
+            valueType: ValueType.Expression,
+            value: expression
+        } as Value)
+    },
+    name: "Reduce Binary Expression"
+}
+
+let reduceParenthesis: Reduction = {
+    checker: (line) => {
+        if (stack.length < 3) return false
+
+        let right = stack[stack.length - 1]
+        let value = stack[stack.length - 2]
+        let left = stack[stack.length - 3]
+
+        if (!right || !value || !left) return false
+        if (!("tokenType" in right) || right.value !== ")") return false
+        if (!("tokenType" in left) || left.value !== "(") return false
+        if (!("valueType" in value)) return false
+
+        return true
+    },
+    reducer: (line) => {
+        stack.pop()
+        let value = stack.pop() as Value
+        stack.pop()
+
+        stack.push(value)
+    },
+    name: "Reduce Parenthesis"
+}
+
 // #endregion
 
 let reductions: Reduction[] = [
     reduceNumber,
-    reduceVariable
+    reduceVariable,
+    reduceBinaryExpr,
+    reduceParenthesis
 ]
 
 function parseExpression(line: Token[], lineNumber: number): Value {

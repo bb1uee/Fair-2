@@ -65,7 +65,7 @@ reduce variable
 [value * (value + sin(d]
 reduce variable
 [value * (value + sin(value]
-reduce parameterlist
+reduce parameterlist (single)
 [value * (value + sin(parameterlist]
 [value * (value + sin(parameterlist)]
 reduce function call

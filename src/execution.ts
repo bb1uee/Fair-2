@@ -1,5 +1,5 @@
 import exp from "constants"
-import { ASTNode, Decleration, DeclerationType, NodeType, Program, Statement, StatementType, Variable, Number, Value, ValueType, Expression, ExpressionOperator, Assignment } from "./parser.js"
+import { ASTNode, Decleration, DeclerationType, NodeType, Program, Statement, StatementType, Variable, Number, Value, ValueType, Expression, ExpressionOperator, Assignment, FunctionCall } from "./parser.js"
 import { createInterface } from 'readline'
 import { readFileSync } from "fs"
 import { NOTIMP } from "dns"
@@ -146,9 +146,16 @@ function assignment(node: ASTNode): number {
     return 0
 }
 
+function functioncall(node: ASTNode): number {
+    let functioncall = node as FunctionCall
+}
+
 //#endregion
 
 let variables: Map<string, RuntimeVariable> = new Map()
+let functions: Map<string, (params: number[]) => number> = new Map([
+    
+])
 let nodeExecutions: Map<NodeType, (node: ASTNode) => number> = new Map([
     [NodeType.Program, program],
     [NodeType.Statement, statement],
@@ -157,7 +164,8 @@ let nodeExecutions: Map<NodeType, (node: ASTNode) => number> = new Map([
     [NodeType.Number, number],
     [NodeType.Value, value],
     [NodeType.Expression, expression],
-    [NodeType.Assignment, assignment]
+    [NodeType.Assignment, assignment],
+    [NodeType.FunctionCall, functioncall]
 ])
 
 let input: Map<string, number> = new Map
