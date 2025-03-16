@@ -407,13 +407,103 @@ let reduceParenthesis: Reduction = {
     name: "Reduce Parenthesis"
 }
 
+let reduceSingleParameter: Reduction = {
+    checker: (line) => {
+        if (stack.length < 3) return false
+
+        let value = stack[stack.length - 1]
+        let paren = stack[stack.length - 2]
+        let identifier = stack[stack.length - 3]
+
+        let goodValue = "valueType" in value
+        let goodParen = "tokenType" in paren && paren.value === "("
+        let goodIdentifier = "tokenType" in identifier && identifier.tokenType === TokenType.identifier
+
+        return goodValue && goodParen && goodIdentifier
+    },
+    reducer: (line) => {
+        let value = stack.pop() as Value
+
+        stack.push({
+            type: NodeType.ParameterList,
+            parameters: [value]
+        } as ParameterList)
+    },
+    name: "Reduce Single Parameter"
+}
+
+let reduceFunctionCall: Reduction = {
+    checker: (line) => {
+        if (stack.length < 4) return false
+
+        let closeParen = stack[stack.length - 1]
+        let paramList = stack[stack.length - 2]
+        let openParam = stack[stack.length - 3]
+        let identifier = stack[stack.length - 4]
+
+        let goodCloseParen = "tokenType" in closeParen && closeParen.value === ")"
+        let goodParamList = "parameters" in paramList
+        let goodOpenParen = "tokenType" in openParam && openParam.value === "("
+        let goodIdentifier = "tokenType" in identifier && identifier.tokenType === TokenType.identifier
+
+        return goodCloseParen && goodParamList && goodOpenParen && goodIdentifier
+    },
+    reducer: (line) => {
+        stack.pop()
+        let paramList = stack.pop() as ParameterList
+        stack.pop()
+        let name = (stack.pop() as Token).value
+
+        let functionCall = {
+            type: NodeType.FunctionCall,
+            name: name,
+            parameters: paramList
+        } as FunctionCall
+
+        stack.push({
+            type: NodeType.Value,
+            valueType: ValueType.FunctionCall,
+            value: functionCall
+        } as Value)
+    },
+    name: "Reduce Function Call"
+}
+
+let reduceParameterList: Reduction = {
+    checker: (line) => {
+        if (stack.length < 3) return false
+
+        let value = stack[stack.length - 1]
+        let comma = stack[stack.length - 2]
+        let params = stack[stack.length - 3]
+
+        let goodValue = "valueType" in value
+        let goodComma = "tokenType" in comma && comma.value === ","
+        let goodParams = "parameters" in params
+
+        return goodValue && goodComma && goodParams
+    },
+    reducer: (line) => {
+        let value = stack.pop() as Value
+        stack.pop()
+        let params = stack.pop() as ParameterList
+        params.parameters.push(value)
+
+        stack.push(params)
+    },
+    name: "Reduce Parameter List"
+}
+
 // #endregion
 
 let reductions: Reduction[] = [
     reduceNumber,
     reduceVariable,
     reduceBinaryExpr,
-    reduceParenthesis
+    reduceParenthesis,
+    reduceSingleParameter,
+    reduceFunctionCall,
+    reduceParameterList
 ]
 
 function parseExpression(line: Token[], lineNumber: number): Value {
@@ -425,6 +515,7 @@ function parseExpression(line: Token[], lineNumber: number): Value {
 
     while (line[0]) {
         stack.push(line.shift() as Token)
+        console.log("Shift")
         attemptReductions(line)
     }
 
@@ -438,6 +529,7 @@ function attemptReductions(line: Token[]) {
         if (_.checker(line)) {
             _.reducer(line)
             console.log(_.name)
+            attemptReductions(line)
         }
     })
 }

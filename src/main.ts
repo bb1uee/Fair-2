@@ -9,12 +9,13 @@ try {
     lexer()
     parse()
 
-    // execute(ast, new Map<string, number>([
-    //     ["a", 2],
-    //     ["b", 3]
-    // ]))
+    execute(ast, new Map<string, number>([
+        ["b", 2],
+        ["c", 3],
+        ["d", 3.14]
+    ]))
 
-    console.log(JSON.stringify(ast, null, 4))
+    // console.log(JSON.stringify(ast, null, 4))
 } catch (e) {
     console.log(e)
 }

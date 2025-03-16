@@ -90,6 +90,9 @@ function value(node: ASTNode): number {
     } else if (value.valueType === ValueType.Variable) {
         let run = nodeExecutions.get(NodeType.Variable) as (node: ASTNode) => number
         return run(value.value as Variable)
+    } else if (value.valueType === ValueType.FunctionCall) {
+        let run = nodeExecutions.get(NodeType.FunctionCall) as (node: ASTNode) => number
+        return run(value.value as FunctionCall)
     } else {
         let run = nodeExecutions.get(NodeType.Expression) as (node: ASTNode) => number
         return run(value.value as Expression)

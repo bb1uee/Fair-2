@@ -48,7 +48,7 @@ reduction list:
     - reduce the entire thing to that same expression
 - reduce function call
     - top of the stack is [identifier ( parameterlist )]
-    - reduce the thing to a value with an expression inside of it
+    - reduce the entire thing to a value with an FunctionCall inside of it
 
 [b * (c + sin(d))]
 [b]

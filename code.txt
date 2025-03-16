@@ -1,3 +1,6 @@
+in b;
+in c;
+in d;
 out a;
 
-a = 2 * (3 + a);
+a = b * (c + sin(d));
