@@ -1,9 +1,4 @@
-in a;
-in b;
-var c;
-out d;
+out a;
 
-c = a * b;
-d = c ^ 2;
-c = d / 2;
-d = c + 4;
+a = 4;
+a = a;

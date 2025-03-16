@@ -1,5 +1,6 @@
 import { Token, tokens, TokenType } from "./lexer.js"
 import { splitArray } from "./utils.js"
+import { isEqual } from "lodash-es"
 
 // #region AST Types
 enum NodeType {
@@ -108,6 +109,12 @@ interface FunctionCall extends ASTNode {
     parameters: ParameterList
 }
 
+interface Reduction {
+    checker: (line: Token[]) => boolean
+    reducer: (line: Token[]) => void
+    name: string
+}
+
 // #endregion
 
 const operators: Operator[] = [
@@ -118,7 +125,7 @@ const operators: Operator[] = [
     { symbol: "^", precedence: 30, type: ExpressionOperator.power },
 ]
 
-// #region utils
+// #region Utils
 
 function accept (tokens: Token[], token: TokenType) {
     if (expect(tokens, token)) {
@@ -149,11 +156,11 @@ function acceptToken (tokens: Token[], token: Token) {
 }
 
 function expectToken (tokens: Token[], token: Token): boolean {
-    if (tokens[0] === token) {
+    if (isEqual(token, tokens[0])) {
         return true
     }
 
-    throw `Invalid Syntax: Expected ${token} instead of ${tokens[0].tokenType} (expect call)`
+    throw `Invalid Syntax: Expected ${JSON.stringify(token, null, 4)} instead of ${JSON.stringify(tokens[0], null, 4)} (expect call)`
 }
 
 function tokenToValue (token: Token): Value {
@@ -193,13 +200,15 @@ let ast: Program = {
 
 let stack: (Token | ASTNode)[] = []
 
-// #region main parser
+// #region Main Parser
 
 function parse() {
     lines = splitArray(tokens, (_) => {
         return _.tokenType === TokenType.EOL
     })
 
+    lines.pop()
+    
     lines.forEach((_, index) => {
         if (parseAssignment(lines[index], index + 1)) return
         else if (parseDecleration(lines[index], index + 1)) return
@@ -264,9 +273,80 @@ function parseDecleration(line: Token[], lineNumber: number): boolean {
 
 // #endregion
 
-// #region expression parsing
-function parseExpression(line: Token[], lineNumber: number, newExpr: boolean = true): Value {
+// #region Expression Parser
+// #region Reductions
 
+let reduceNumber: Reduction = {
+    checker: (line) => {
+        return "tokenType" in stack[0] && stack[0].tokenType === TokenType.number
+    },
+    reducer: (line) => {
+        let token = stack.pop() as Token
+        let num: Number = {
+            type: NodeType.Number,
+            value: parseFloat(token.value)
+        }
+
+        stack.push({
+            type: NodeType.Value,
+            valueType: ValueType.Number,
+            value: num
+        } as Value)
+    },
+    name: "Reduce Number"
+}
+
+let reduceVariable: Reduction = {
+    checker: (line) => {
+        return "tokenType" in stack[0] && stack[0].tokenType === TokenType.identifier && (line[0].tokenType === TokenType.operator || line[0].tokenType === TokenType.EOL)
+    },
+    reducer: (line) => {
+        let token = stack.pop() as Token
+        let variable: Variable = {
+            type: NodeType.Variable,
+            name: token.value
+        }
+
+        stack.push({
+            type: NodeType.Value,
+            valueType: ValueType.Variable,
+            value: variable
+        } as Value)
+    },
+    name: "Reduce Variable"
+}
+
+// #endregion
+
+let reductions: Reduction[] = [
+    reduceNumber,
+    reduceVariable
+]
+
+function parseExpression(line: Token[], lineNumber: number): Value {
+    stack = []
+    line.push({
+        tokenType: TokenType.EOL,
+        value: "EOL"
+    })
+
+    while (line[0]) {
+        stack.push(line.shift() as Token)
+        attemptReductions(line)
+    }
+
+    if (!("valueType" in stack[0])) throw `Parsing Error: value is not at the top of the stack on line ${lineNumber}`
+
+    return stack[0] as Value
+}
+
+function attemptReductions(line: Token[]) {
+    reductions.forEach(_ => {
+        if (_.checker(line)) {
+            _.reducer(line)
+            console.log(_.name)
+        }
+    })
 }
 // #endregion
 
