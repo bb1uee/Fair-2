@@ -18,5 +18,5 @@ variable -> returns a get function (remember to add all the as so typescript doe
 value -> returns codegen for child
 expression -> returns the lhs and rhs with operator in between (all in parenthesis)
 number -> returns the number
-parameterlist -> returns all the values seperated by commas
-function call -> returns the name of the function with the parameter list in parenthesis
+parameterlist -> returns all the values in an array
+function call -> returns the value of a function call to funcs with the parameters as the input

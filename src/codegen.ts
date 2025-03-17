@@ -10,19 +10,19 @@ function program(node: ASTNode): string {
     })
 
     let code = `
-    function run(_funcs: Map<string, (params: number[]) => number>, input: Map<string, number>): Map<string, number> {
+    function run(funcs: Map<string, (params: number[]) => number>, input: Map<string, number>): Map<string, number> {
         let variables: Map<string, {
             value: number,
             type: ("in" | "out" | "var")
         }> = new Map();
-
-        ${children.join("")}
         input.forEach((value, key) => {
             variables.set(key, {
                 value: value,
                 type: "in"
             })
         });
+
+        ${children.join("")}
 
         let ret: Map<string, number> = new Map();
 
@@ -62,6 +62,8 @@ function decleration(node: ASTNode): string {
         type: "${declType}"
     })`
 
+    if (declType === "in") return ""
+
     return code
 }
 
@@ -88,16 +90,16 @@ function value(node: ASTNode): string {
             run = codeGenerators.get(NodeType.Number) as (node: ASTNode) => string
             return run(value.value)
             break
-        case ValueType.Number:
-            run = codeGenerators.get(NodeType.Number) as (node: ASTNode) => string
+        case ValueType.Variable:
+            run = codeGenerators.get(NodeType.Variable) as (node: ASTNode) => string
             return run(value.value)
             break
-        case ValueType.Number:
-            run = codeGenerators.get(NodeType.Number) as (node: ASTNode) => string
+        case ValueType.Expression:
+            run = codeGenerators.get(NodeType.Expression) as (node: ASTNode) => string
             return run(value.value)
             break
-        case ValueType.Number:
-            run = codeGenerators.get(NodeType.Number) as (node: ASTNode) => string
+        case ValueType.FunctionCall:
+            run = codeGenerators.get(NodeType.FunctionCall) as (node: ASTNode) => string
             return run(value.value)
             break
     }
@@ -110,9 +112,68 @@ function number(node: ASTNode): string {
 
     return `${number.value}`
 }
+
+function variable(node: ASTNode): string {
+    let variable = node as Variable
+
+    return `(variables.get("${variable.name}") as {
+            value: number,
+            type: ("in" | "out" | "var")
+        }).value`
+}
+
+function expression(node: ASTNode): string {
+    let expression = node as Expression
+    let run = codeGenerators.get(NodeType.Value) as (node: ASTNode) => string
+
+    let lhs = run(expression.lhs)
+    let rhs = run(expression.rhs)
+    let opString = "+"
+
+    switch (expression.operator) {
+        case ExpressionOperator.plus:
+            opString = "+"
+            break
+        case ExpressionOperator.minus:
+            opString = "-"
+            break
+        case ExpressionOperator.times:
+            opString = "*"
+            break
+        case ExpressionOperator.divide:
+            opString = "/"
+            break
+        case ExpressionOperator.power:
+            opString = "**"
+            break
+    }
+
+    return `(${lhs} ${opString} ${rhs})`
+}
+
+function parameterList(node: ASTNode): string {
+    let parameterList = node as ParameterList
+    let params: string[] = []
+    let run = codeGenerators.get(NodeType.Value) as (node: ASTNode) => string
+
+    parameterList.parameters.forEach(_ => {
+        params.push(run(_))
+    })
+
+    return `[${params.join(",")}]`
+}
+
+function functionCall(node: ASTNode): string {
+    let functionCall = node as FunctionCall
+    let run = codeGenerators.get(NodeType.ParameterList) as (node: ASTNode) => string
+    let get = `(funcs.get("${functionCall.name}") as (params: number[]) => number)`
+
+    return `${get}(${run(functionCall.parameters)})`
+}
+
 // #endregion
 
-import { Assignment, ASTNode, Decleration, DeclerationType, NodeType, Program, Statement, StatementType, Value, ValueType, Variable, Number } from "./parser.js"
+import { Assignment, ASTNode, Decleration, DeclerationType, NodeType, Program, Statement, StatementType, Value, ValueType, Variable, Number, Expression, ExpressionOperator, ParameterList, FunctionCall } from "./parser.js"
 
 const codeGenerators: Map<NodeType, (node: ASTNode) => string> = new Map([
     [NodeType.Program, program],
@@ -120,7 +181,11 @@ const codeGenerators: Map<NodeType, (node: ASTNode) => string> = new Map([
     [NodeType.Decleration, decleration],
     [NodeType.Assignment, assignment],
     [NodeType.Value, value],
-    [NodeType.Number, number]
+    [NodeType.Number, number],
+    [NodeType.Variable, variable],
+    [NodeType.Expression, expression],
+    [NodeType.ParameterList, parameterList],
+    [NodeType.FunctionCall, functionCall]
 ])
 
 function codegen(program: Program): string {

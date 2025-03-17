@@ -1,3 +1,4 @@
 in a;
+out b;
 
-a = 3;
+b = a + sin(pi());

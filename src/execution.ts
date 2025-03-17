@@ -255,5 +255,6 @@ function execute(program: Program, pinput: Map<string, number>) {
 }
 
 export {
-    execute
+    execute,
+    functions
 }
