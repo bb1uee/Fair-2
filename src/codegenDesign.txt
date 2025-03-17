@@ -1,0 +1,22 @@
+same method as execution
+
+table contains a key to an ast nodetype
+and a function that returns a string of js
+
+function signature:
+- takes in:
+    - ast node
+- returns:
+    - string containing code segment
+
+program -> returns function wrapper + gets codegen for every child
+    - wrapper takes in a map for the functions
+statement -> gets codegen for the child
+decleration -> returns a let statement
+assignment -> returns an asssignment where it executes the right and left hand side to get their values
+variable -> returns a get function (remember to add all the as so typescript doesn't complain)
+value -> returns codegen for child
+expression -> returns the lhs and rhs with operator in between (all in parenthesis)
+number -> returns the number
+parameterlist -> returns all the values seperated by commas
+function call -> returns the name of the function with the parameter list in parenthesis

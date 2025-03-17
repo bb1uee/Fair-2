@@ -1,13 +1,3 @@
 in a;
-in b;
-in C;
-var c;
-out D;
-out pi;
 
-C = dr(C);
-c = a^2 + b^2 - 2a * b * cos(C);
-c = sqrt(c);
-D = arccos((a^2+c^2-b^2)/(2a*c));
-D = rd(D);
-pi = pi();
+a = 3;

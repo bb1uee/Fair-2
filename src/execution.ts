@@ -239,7 +239,7 @@ let nodeExecutions: Map<NodeType, (node: ASTNode) => number> = new Map([
     [NodeType.FunctionCall, functioncall]
 ])
 
-let input: Map<string, number> = new Map
+let input: Map<string, number> = new Map()
 
 function execute(program: Program, pinput: Map<string, number>) {
 
