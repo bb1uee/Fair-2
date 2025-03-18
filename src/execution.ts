@@ -249,7 +249,7 @@ function execute(program: Program, pinput: Map<string, number>) {
 
     variables.forEach(_ => {
         if (_.type === DeclerationType.out) {
-            console.log(_.value)
+            console.log(`${_.name}: ${_.value}`)
         }
     })
 }
