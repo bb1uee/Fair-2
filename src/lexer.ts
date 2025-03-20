@@ -47,8 +47,6 @@ function lexer() {
     while (peekCharacter() !== "") {
         let nextChar = peekCharacter()
 
-        console.log(nextChar)
-
         if (nextChar === " " || nextChar === "\n" || nextChar === "\t" || nextChar === "\r") {
             consumeCharacter()
             continue

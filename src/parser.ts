@@ -561,9 +561,8 @@ function parseExpression(line: Token[], lineNumber: number): Value {
         attemptReductions(line)
     }
 
-    console.log(JSON.stringify(stack, null, 4))
     if (!("valueType" in stack[0])) throw `Parsing Error: value is not at the top of the stack on line ${lineNumber}`
-
+    console.log(JSON.stringify(stack[0], null, 4))
     return stack[0] as Value
 }
 

@@ -157,7 +157,6 @@ function functioncall(node: ASTNode): number {
     let params: number[] = []
 
     functioncall.parameters.parameters.forEach(_ => {
-        console.log(JSON.stringify(_, null, 4))
         params.push(run (_))
     })
 
