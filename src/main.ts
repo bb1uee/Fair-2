@@ -11,9 +11,9 @@ try {
     parse()
 
     execute(ast, new Map<string, number>([
-        ["a", 3.1],
-        ["b", 4.9],
-        ["C", 123]
+        ["a", 23],
+        ["b", 17],
+        ["C", 23]
     ]))
 
     // console.log(codegen(ast))

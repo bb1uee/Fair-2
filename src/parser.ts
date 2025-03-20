@@ -411,12 +411,13 @@ let reduceParenthesis: Reduction = {
 let reduceSingleParameter: Reduction = {
     checker: (line) => {
         if (stack.length < 3) return false
+        if (!line[0]) return false
 
         let seperator = line[0]
         let value = stack[stack.length - 1]
         let paren = stack[stack.length - 2]
         let identifier = stack[stack.length - 3]
-
+        
         let goodSeperator = "tokenType" in seperator && (seperator.value === ")" || seperator.value === ",")
         let goodValue = "valueType" in value
         let goodParen = "tokenType" in paren && paren.value === "("

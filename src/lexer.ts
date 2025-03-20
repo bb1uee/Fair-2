@@ -24,6 +24,9 @@ function readNumber(value: string): number {
     if (isNum(nextChar) || nextChar === ".") {
         value = value.concat(consumeCharacter())
         return readNumber(value)
+    } else if (!value && nextChar === "-") {
+        value = "-"
+        return readNumber(value)
     } else {
         return parseFloat(value)
     }
@@ -43,7 +46,9 @@ function readWord(value: string): string {
 function lexer() {
     while (peekCharacter() !== "") {
         let nextChar = peekCharacter()
-        
+
+        console.log(nextChar)
+
         if (nextChar === " " || nextChar === "\n" || nextChar === "\t" || nextChar === "\r") {
             consumeCharacter()
             continue
@@ -62,6 +67,10 @@ function lexer() {
                 consumeCharacter()
                 continue
             case '-':
+                if (tokens[tokens.length - 1].tokenType === TokenType.operator) {
+                    // console.log(`${JSON.stringify(tokens, null, 4)} ${nextChar}`)
+                    break
+                }
                 tokens.push({ tokenType: TokenType.operator, value: '-' })
                 consumeCharacter()
                 continue
@@ -95,8 +104,9 @@ function lexer() {
                 continue
         }
 
-        if (isNum(nextChar)) {
+        if (isNum(nextChar) || nextChar === "-") {
             let val = readNumber("")
+            
             tokens.push({ tokenType: TokenType.number, value: val.toString() })
             continue
         } else if (isAlpha(nextChar)) {

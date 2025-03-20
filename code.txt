@@ -1,8 +1,10 @@
 in b;
 in a;
 in C;
-var c;
+out c;
 out D;
+out A;
+out B;
 out pi;
  
  C = dr(C);
@@ -11,3 +13,7 @@ out pi;
  D = arccos((a^2+c^2-b^2)/(2a*c));
  D = rd(D);
  pi = pi();
+ var e;
+ e = -3;
+ A = a;
+ B = b;
