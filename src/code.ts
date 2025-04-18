@@ -3,7 +3,11 @@ import { readFileSync } from "fs"
 var programCode: string = "awdaw awdaw "
 
 function readCode(path: string) {
-    programCode = readFileSync(path, { encoding: 'utf-8', flag: 'r' })
+    try{
+        programCode = readFileSync(path, { encoding: 'utf-8', flag: 'r' })
+    } catch (err) {
+    programCode = ""
+    }
     programCode = programCode.concat("$")
     programCode = programCode.replace("\n", " ")
 }
